@@ -1,0 +1,33 @@
+# Dataset files
+data/raw/*
+data/processed/*
+!data/raw/README.md
+!data/processed/README.md
+
+# Generated artifacts
+models/*
+results/*
+!models/README.md
+!results/README.md
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+!.env.example
