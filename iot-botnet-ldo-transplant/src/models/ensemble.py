@@ -1,11 +1,8 @@
-
-"""Prototype ensemble for the IoT botnet detection project.
-
-This is an untrained model definition, not a validated detector.
-"""
+"""Prototype ensemble for the IoT botnet detection project."""
 
 from sklearn.ensemble import (
     ExtraTreesClassifier,
+    GradientBoostingClassifier,
     RandomForestClassifier,
     VotingClassifier,
 )
@@ -13,6 +10,7 @@ from sklearn.ensemble import (
 
 def build_ensemble(random_state=42):
     """Create a soft-voting ensemble of three classifiers."""
+
     random_forest = RandomForestClassifier(
         n_estimators=50,
         random_state=random_state,
@@ -25,11 +23,10 @@ def build_ensemble(random_state=42):
         n_jobs=-1,
     )
 
-    gradient_boosting = RandomForestClassifier(
+    gradient_boosting = GradientBoostingClassifier(
         n_estimators=50,
         max_depth=5,
         random_state=random_state,
-        n_jobs=-1,
     )
 
     model = VotingClassifier(
@@ -42,4 +39,3 @@ def build_ensemble(random_state=42):
     )
 
     return model
-    
