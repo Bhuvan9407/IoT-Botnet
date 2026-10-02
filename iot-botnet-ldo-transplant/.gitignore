@@ -1,5 +1,6 @@
 # Dataset files
 data/raw/*
+!data/raw/manifest.txt
 data/processed/*
 !data/raw/README.md
 !data/processed/README.md
