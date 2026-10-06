@@ -5,11 +5,15 @@ data/processed/*
 !data/raw/README.md
 !data/processed/README.md
 
+# Leakage-safe Milestone 4 generated data
+data/processed_unscaled/*
+
 # Generated artifacts
 models/*
 results/*
 !models/README.md
 !results/README.md
+!results/smoke_test_results.csv
 
 # Python
 __pycache__/
@@ -32,4 +36,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Required Milestone 3 summary log
 !data/processed/summary_log.csv

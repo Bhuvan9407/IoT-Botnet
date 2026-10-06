@@ -1,0 +1,4 @@
+model,dataset,split_type,fold,random_state,train_rows,test_rows,train_benign,train_attack,test_benign,test_attack,accuracy,macro_f1,fpr
+cnn,nbaiot,ldo,Danmini_Doorbell,42,2000,1000,700,1300,331,669,0.997,0.9966156418266058,0.0030211480362537764
+ensemble,nbaiot,ldo,Danmini_Doorbell,42,2000,1000,700,1300,331,669,0.996,0.9954909458192049,0.0030211480362537764
+autoencoder,nbaiot,ldo,Danmini_Doorbell,42,2000,1000,700,1300,331,669,0.332,0.25036471776456065,0.0
