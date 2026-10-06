@@ -32,3 +32,4 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+!data/processed/summary_log.csv

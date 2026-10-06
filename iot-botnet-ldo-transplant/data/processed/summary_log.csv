@@ -1,0 +1,13 @@
+dataset,group,output_file,rows,columns,features,benign_rows,attack_rows,class_balance
+MedBIoT,fan,fan_processed.npy,200000,101,100,100000,100000,"0=100000,1=100000"
+MedBIoT,light,light_processed.npy,200000,101,100,100000,100000,"0=100000,1=100000"
+MedBIoT,switch,switch_processed.npy,200000,101,100,100000,100000,"0=100000,1=100000"
+N-BaIoT,Danmini_Doorbell,Danmini_Doorbell_processed.npy,149548,101,100,49548,100000,"0=49548,1=100000"
+N-BaIoT,Ecobee_Thermostat,Ecobee_Thermostat_processed.npy,113113,101,100,13113,100000,"0=13113,1=100000"
+N-BaIoT,Ennio_Doorbell,Ennio_Doorbell_processed.npy,139100,101,100,39100,100000,"0=39100,1=100000"
+N-BaIoT,Philips_B120N10_Baby_Monitor,Philips_B120N10_Baby_Monitor_processed.npy,200000,101,100,100000,100000,"0=100000,1=100000"
+N-BaIoT,Provision_PT_737E_Security_Camera,Provision_PT_737E_Security_Camera_processed.npy,162154,101,100,62154,100000,"0=62154,1=100000"
+N-BaIoT,Provision_PT_838_Security_Camera,Provision_PT_838_Security_Camera_processed.npy,198514,101,100,98514,100000,"0=98514,1=100000"
+N-BaIoT,Samsung_SNH_1011_N_Webcam,Samsung_SNH_1011_N_Webcam_processed.npy,152150,101,100,52150,100000,"0=52150,1=100000"
+N-BaIoT,SimpleHome_XCS7_1002_WHT_Security_Camera,SimpleHome_XCS7_1002_WHT_Security_Camera_processed.npy,146585,101,100,46585,100000,"0=46585,1=100000"
+N-BaIoT,SimpleHome_XCS7_1003_WHT_Security_Camera,SimpleHome_XCS7_1003_WHT_Security_Camera_processed.npy,119528,101,100,19528,100000,"0=19528,1=100000"
