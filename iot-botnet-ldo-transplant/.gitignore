@@ -39,3 +39,6 @@ Thumbs.db
 
 # Required Milestone 3 summary log
 !data/processed/summary_log.csv
+
+# Required Milestone 5 results
+!results/raw_metrics.csv
