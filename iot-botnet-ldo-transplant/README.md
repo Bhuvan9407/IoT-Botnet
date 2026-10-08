@@ -3,44 +3,245 @@
 **Research title:** Established IoT Botnet Detectors Under Leave-Device-Out Evaluation: A Transplant Comparison on N-BaIoT and the Under-Cited MedBIoT Dataset
 
 ## Overview
-This project investigates established IoT botnet detection approaches under random train/test splits and Leave-Device-Out (LDO) evaluation using N-BaIoT and MedBIoT.
 
-Planned detector families:
-- Ensemble models
-- Autoencoders
-- 1D convolutional neural networks (1D-CNNs)
+This project evaluates established machine-learning approaches for IoT botnet detection under two evaluation protocols:
 
-The experiments will examine whether model performance and relative behavior change across evaluation protocols and datasets. Results are not assumed in advance.
+1. **Random stratified train/test splitting**, representing conventional row-level evaluation.
+2. **Leave-Device-Out (LDO) evaluation**, where an entire device or device type is held out from training and used exclusively for testing.
 
-## Repository status
-This is a research scaffold containing documentation and directory structure. Experiment code, validated feature mappings, and results should be added as they are completed.
+The study compares three detector families across the **N-BaIoT** and **MedBIoT** datasets:
 
-## Structure
-```text
-.
-├── data/
-│   ├── raw/          # Original datasets (excluded from Git)
-│   └── processed/    # Derived datasets (excluded from Git)
-├── docs/
-│   └── milestone-1/  # Literature review and schema investigation
-├── models/           # Saved model artifacts (excluded from Git)
-├── notebooks/        # Exploration and experiment notebooks
-├── results/          # Metrics, tables, and figures
-├── src/              # Reusable preprocessing/training/evaluation code
-└── tests/            # Data and evaluation tests
-```
+- **Ensemble:** Random Forest + Extra Trees + Gradient Boosting using soft voting.
+- **Autoencoder:** unsupervised reconstruction-based anomaly detector trained only on benign training data.
+- **1D-CNN:** supervised one-dimensional convolutional neural network.
 
-## Datasets
-Dataset files are not included. Obtain them from their original sources and place them under `data/raw/`. Check license and usage terms before redistribution.
+The central research question is whether strong conventional performance is preserved when detectors are evaluated on previously unseen devices or device types.
 
-The initial feature-schema investigation is in `docs/milestone-1/feature-schema-investigation.md`. Similar column names are not treated as proof of semantic equivalence. Validate any cross-dataset mapping before using it.
+## Key Findings
+
+The final evaluation contains **126 experiments**:
+
+- 2 datasets
+- 3 detector families
+- 3 random seeds
+- 3 random-split runs per model/dataset
+- 108 LDO runs covering all held-out device/device-type folds
+
+The principal findings are:
+
+- The **Ensemble achieved the strongest overall performance** under both evaluation protocols.
+- The **1D-CNN remained highly competitive**, particularly on N-BaIoT.
+- The **Autoencoder was substantially more sensitive to device-level distribution shift**, especially on N-BaIoT.
+- Random row-level evaluation produced extremely high scores for several models, demonstrating why random splits alone can provide an optimistic estimate of deployment performance.
+- LDO evaluation provides a more demanding assessment of generalization to previously unseen devices or device types.
+- On N-BaIoT, Autoencoder FPR increased from approximately **5.07% under random splitting to 12.40% under LDO**.
+- On MedBIoT, Autoencoder FPR remained comparatively stable, increasing from approximately **5.16% to 5.38%**.
+- The Ensemble consistently provided the best combination of accuracy, macro-F1, and low false-positive rate.
+
+These findings are interpreted as empirical evidence of differing robustness to device-specific distribution shift rather than as evidence of formal statistical significance.
+
+## Final Results
+
+### Random-split evaluation
+
+Random evaluation uses stratified row-level train/test splitting. Three independent random seeds were evaluated for each model and dataset.
+
+| Dataset | Model | Accuracy | Macro-F1 | FPR |
+|---|---|---:|---:|---:|
+| N-BaIoT | Ensemble | 0.999892 | 0.999881 | 0.002% |
+| N-BaIoT | 1D-CNN | 0.999367 | 0.999302 | 0.117% |
+| N-BaIoT | Autoencoder | 0.979158 | 0.976810 | 5.074% |
+| MedBIoT | Ensemble | 0.998683 | 0.998683 | 0.083% |
+| MedBIoT | 1D-CNN | 0.962175 | 0.962135 | 0.552% |
+| MedBIoT | Autoencoder | 0.848550 | 0.847020 | 5.162% |
+
+### Leave-Device-Out evaluation
+
+LDO evaluation holds out an entire physical device for N-BaIoT and an entire device type for MedBIoT.
+
+| Dataset | Model | Accuracy | Macro-F1 | FPR |
+|---|---|---:|---:|---:|
+| N-BaIoT | Ensemble | 0.998331 | 0.998089 | 0.463% |
+| N-BaIoT | 1D-CNN | 0.996698 | 0.996088 | 0.924% |
+| N-BaIoT | Autoencoder | 0.956083 | 0.940752 | 12.404% |
+| MedBIoT | Ensemble | 0.986106 | 0.986095 | 0.321% |
+| MedBIoT | 1D-CNN | 0.957903 | 0.957834 | 1.017% |
+| MedBIoT | Autoencoder | 0.832111 | 0.828419 | 5.381% |
+
+Values are means across the corresponding evaluated seeds/folds.
+
+## Evaluation Design
+
+### Datasets
+
+The study uses:
+
+- **N-BaIoT:** network traffic generated by multiple IoT devices under benign and attack conditions.
+- **MedBIoT:** IoT traffic covering fan, light, and switch device types with legitimate and malicious traffic.
+
+A common 100-feature representation is used for both datasets.
+
+For N-BaIoT, the original 115-feature schema is reduced by removing the 15-feature H family. The resulting representation consists of:
+
+- MI_dir: 15 features
+- HH: 35 features
+- HH_jit: 15 features
+- HpHp: 35 features
+
+MedBIoT already provides the corresponding 100-feature representation.
+
+Because feature names and statistical terminology differ between the datasets, the preprocessing pipeline maps them into a canonical positional schema rather than assuming that similarly named columns are automatically semantically identical.
+
+### Preprocessing
+
+The preprocessing pipeline:
+
+- constructs binary labels (`0 = benign`, `1 = attack`);
+- standardizes the feature representation to 100 features;
+- performs stratified class-wise subsampling with a maximum of 100,000 rows per class per device/device type;
+- retains unscaled data for leakage-safe experiment-time scaling;
+- records preprocessing statistics in `data/processed/summary_log.csv`.
+
+For the final experiments, feature scaling is fitted **only on the training partition** and subsequently applied to the corresponding test partition.
+
+### Random split
+
+Random experiments use stratified row-level train/test splitting.
+
+Three random seeds are used:
+
+- 42
+- 43
+- 44
+
+The random split is retained as a conventional baseline but is not treated as evidence of unseen-device generalization.
+
+### Leave-Device-Out
+
+For LDO evaluation:
+
+- each N-BaIoT physical device is treated as an independent held-out unit;
+- each MedBIoT device type (`fan`, `light`, `switch`) is treated as an independent held-out unit.
+
+The held-out unit contributes no training rows.
+
+This evaluation is intended to expose distribution shifts associated with previously unseen devices or device types.
+
+## Detector Implementations
+
+### Ensemble
+
+The ensemble combines Random Forest, Extra Trees, and Gradient Boosting using soft voting.
+
+### Autoencoder
+
+The autoencoder is trained exclusively using benign samples from the training partition. Anomaly scores are obtained from reconstruction error, with the anomaly threshold derived only from benign training reconstruction errors.
+
+### 1D-CNN
+
+The 1D-CNN treats the standardized 100-feature vector as a one-dimensional sequence and performs supervised binary classification.
+
+## Evaluation Metrics
+
+The primary metrics are Accuracy, Macro-F1, and False Positive Rate (FPR). Macro-F1 balances performance across benign and attack classes, while FPR is important for practical intrusion-detection deployment.
+
+
+## Final Analysis and Visualizations
+
+The publication-oriented analysis is available in:
+
+- docs/milestone-7/final-analysis-report.md
+- notebooks/final_visualizations.ipynb
+- docs/milestone-7/figures/
+
+The visualization suite contains:
+
+1. Random vs LDO Macro-F1 comparison
+2. FPR comparison highlighting Autoencoder behavior
+3. Macro-F1 degradation from random splitting to LDO
+
+The final aggregated statistics are available in results/final_summary_stats.csv.
+
+The complete experiment-level metrics are available in results/raw_metrics.csv.
+
+## Statistical Interpretation
+
+The Ensemble achieved higher mean LDO performance than the 1D-CNN on both datasets. On N-BaIoT, the difference was small relative to observed variability. On MedBIoT, the difference was approximately equal to, and marginally exceeded, the sum of the observed standard deviations.
+
+These results are reported as effect-size and variability evidence rather than formal statistical significance. The study uses three random seeds and device-level LDO folds, so these experimental units should not be treated as fully independent replicates for a conventional significance test.
+
 
 ## Reproducibility
-As experiments are implemented, record dataset provenance, preprocessing and label construction, device-level splits, random seeds, model configurations, metrics, software versions, and hardware.
 
-## Milestone 1 status
-- Four-paper literature review drafted.
-- Initial feature-schema investigation documented.
-- Basic Keras 1D-CNN construction and forward-pass check completed.
+The experiment pipeline is implemented in Python.
 
-Further validation and experiment implementation remain in progress.
+Important reproducibility information includes:
+
+- random seeds: 42, 43, 44
+- dataset-level and device-level split definitions
+- training/test row caps
+- model configuration
+- training epochs and batch sizes
+- leakage-safe scaling
+- Autoencoder threshold construction
+- experiment-level metrics
+
+Main implementation files:
+
+- src/data/prep.py
+- src/train.py
+- scripts/run_milestone5.ps1
+- scripts/run_milestone6.ps1
+- scripts/run_milestone6_pilot.ps1
+- notebooks/final_visualizations.ipynb
+
+Raw and processed dataset files are intentionally excluded from Git. Dataset provenance and staging information are documented in data/raw/manifest.txt, docs/milestone-2/data-staging-report.md, and docs/milestone-3/preprocessing-report.md.
+
+## Repository Structure
+
+.
+|-- data/
+|   |-- raw/
+|   |-- processed/
+|   -- processed_unscaled/
+|-- docs/
+|   |-- milestone-1/
+|   |-- milestone-2/
+|   |-- milestone-3/
+|   |-- milestone-4/
+|   |-- milestone-5/
+|   |-- milestone-6/
+|   -- milestone-7/
+|-- notebooks/
+|-- results/
+|-- scripts/
+|-- src/
+-- tests/
+
+## Limitations
+
+1. The study evaluates two established datasets and does not establish generalization to all IoT environments.
+2. LDO units differ by dataset: physical devices are used for N-BaIoT, while device types are used for MedBIoT.
+3. Only three random seeds are used.
+4. The current study does not perform cross-dataset transfer learning.
+5. Feature harmonization requires care because similarly named statistical features are not necessarily semantically identical.
+6. The datasets may not fully represent contemporary production IoT traffic.
+
+## Research Artifacts
+
+- docs/milestone-1/ â€” Literature review and feature-schema investigation
+- docs/milestone-2/ â€” Dataset staging and provenance
+- docs/milestone-3/ â€” Preprocessing methodology
+- docs/milestone-4/ â€” Model training and evaluation implementation
+- docs/milestone-5/ â€” Random-split baseline
+- docs/milestone-6/ â€” Leave-Device-Out evaluation
+- docs/milestone-7/final-analysis-report.md â€” Final publication-oriented analysis
+- notebooks/final_visualizations.ipynb â€” Reproducible visual analysis
+- results/raw_metrics.csv â€” Complete experiment-level results
+- results/final_summary_stats.csv â€” Final aggregated statistics
+
+## Project Status
+
+**Final experimental analysis completed.**
+
+The repository now contains the complete preprocessing, model-training, random-split baseline, Leave-Device-Out evaluation, statistical interpretation, visualization, and final analysis artifacts for the current research stage.

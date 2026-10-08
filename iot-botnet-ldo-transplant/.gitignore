@@ -42,3 +42,6 @@ Thumbs.db
 
 # Required Milestone 5 results
 !results/raw_metrics.csv
+
+# Required Milestone 7 final summary
+!results/final_summary_stats.csv
